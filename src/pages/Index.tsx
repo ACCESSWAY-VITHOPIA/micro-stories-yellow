@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Play, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [email, setEmail] = useState("");
@@ -15,14 +16,40 @@ const Index = () => {
       toast.error("Please enter your email address");
       return;
     }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
     
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    setIsSubscribed(true);
-    setEmail("");
-    toast.success("You're on the list! We'll notify you when we launch.");
+    
+    try {
+      const { error } = await supabase
+        .from('waitlist')
+        .insert({ email: email.toLowerCase().trim() });
+
+      if (error) {
+        if (error.code === '23505') {
+          // Unique constraint violation - email already exists
+          toast.info("You're already on the waitlist!");
+          setIsSubscribed(true);
+        } else {
+          throw error;
+        }
+      } else {
+        setIsSubscribed(true);
+        toast.success("You're on the list! We'll notify you when we launch.");
+      }
+    } catch (error) {
+      console.error("Error joining waitlist:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setEmail("");
+    }
   };
 
   return (
