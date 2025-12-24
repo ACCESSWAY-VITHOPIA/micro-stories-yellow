@@ -96,7 +96,7 @@ const Index = () => {
           className="text-xl md:text-2xl text-muted-foreground font-light text-center mb-2 opacity-0 animate-fade-in-up"
           style={{ animationDelay: "0.4s" }}
         >
-          Bite-sized dramas. Endless emotions.
+          Reel-sized dramas. Endless emotions.
         </p>
 
         {/* Coming Soon badge */}
